@@ -22,6 +22,11 @@ public class FeedsContractTest {
     }
 
     @Test
+    public void theSyncRequestMethodMatchesTheApp() {
+        assertEquals("sync_if_stale", FeedsContract.METHOD_SYNC_IF_STALE);
+    }
+
+    @Test
     public void urisFollowTheAppsPaths() {
         assertEquals("content://com.codebymaribel.feeds.provider", FeedsContract.root());
         assertEquals("content://com.codebymaribel.feeds.provider/feed/2", FeedsContract.feed(NavTabs.WATCHLIST));

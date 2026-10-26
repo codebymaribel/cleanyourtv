@@ -31,6 +31,9 @@ final class FeedsContract {
     /** The trailer's YouTube video id, "" when there is none. */
     static final String COLUMN_TRAILER = "trailer";
 
+    /** ContentResolver.call method: the app syncs when its data is older than 30 minutes. */
+    static final String METHOD_SYNC_IF_STALE = "sync_if_stale";
+
     static final String[] COLUMNS = {
             COLUMN_TYPE, COLUMN_ID, COLUMN_TITLE, COLUMN_SUMMARY, COLUMN_HAS_POSTER, COLUMN_HAS_BACKDROP,
             COLUMN_YEAR, COLUMN_GENRES, COLUMN_RUNTIME, COLUMN_TRAILER};

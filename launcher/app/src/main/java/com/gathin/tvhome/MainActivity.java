@@ -185,6 +185,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private PosterLoader posterLoader;
     private PosterLoader backdropLoader;
     private Backdrop backdrop;
+    /** Asks the companion app for a sync on the way back to Home, when its data is stale. */
+    private FeedsRefresh feedsRefresh;
     /** Told by the companion app when a sync finished; null when the app is not installed. */
     private ContentObserver feedsObserver;
     private View btnInputs;
@@ -966,10 +968,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onResume() {
         super.onResume();
-        // nav_tabs: the companion app was installed after Home started, so nothing was watching its syncs yet.
-        if (navBar != null && feedsObserver == null) {
-            watchFeeds();
-            if (feedsObserver != null) titles.reload();
+        if (navBar != null) {
+            // The companion app was installed after Home started, so nothing was watching its syncs yet.
+            if (feedsObserver == null) {
+                watchFeeds();
+                if (feedsObserver != null) titles.reload();
+            }
+            feedsRefresh.requestIfStale();
         }
         // A festival that started or ended while Home was in the background: rebuild with or without it.
         if (festive != festival.active(LocalDate.now())) {
@@ -1253,6 +1258,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (posterLoader != null) posterLoader.shutdown();
         if (backdropLoader != null) backdropLoader.shutdown();
         if (backdrop != null) backdrop.shutdown();
+        if (feedsRefresh != null) feedsRefresh.shutdown();
         if (feedsObserver != null) getContentResolver().unregisterContentObserver(feedsObserver);
         ConnectivityManager cm = getSystemService(ConnectivityManager.class);
         TvInputManager tim = (TvInputManager) getSystemService(TV_INPUT_SERVICE);
@@ -2380,6 +2386,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
         });
         watchFeeds();
+        feedsRefresh = new FeedsRefresh(getContentResolver());
         navBar = new NavBar(bar, new NavBar.Listener() {
             @Override
             public void onTabSelected(int tab) {
