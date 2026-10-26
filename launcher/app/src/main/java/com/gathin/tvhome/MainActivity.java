@@ -434,6 +434,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         wallpaperPlayer = new WallpaperPlayer(this, root, cfg);
         sky = findViewById(R.id.sky);
         sky.setIntensity(cfg.skyIntensity);
+        if (cfg.gridBackdropColor != 0) {
+            View gridBackdrop = findViewById(R.id.gridBackdrop);
+            gridBackdrop.setBackground(new GridBackdropDrawable(cfg.gridBackdropColor, cfg.backgroundColor));
+            gridBackdrop.setVisibility(View.VISIBLE);
+        }
         glass = findViewById(R.id.glass);
         glass.setStyle(cfg.glassStyle);
         if (festive) glass.setAccent(festival.accentColor());
