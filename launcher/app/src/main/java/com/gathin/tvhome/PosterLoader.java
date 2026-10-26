@@ -7,7 +7,7 @@ import androidx.annotation.Nullable;
 
 import java.util.function.Consumer;
 
-/** Decodes carousel posters off the main thread and keeps the recent ones in memory. */
+/** Decodes the nav tabs' posters off the main thread and keeps the recent ones in memory. */
 interface PosterLoader {
 
     /** The decoded poster when it is in memory, or null. Main thread. */

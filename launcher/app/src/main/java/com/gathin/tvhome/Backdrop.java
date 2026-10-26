@@ -11,7 +11,7 @@ import androidx.annotation.Nullable;
 
 /**
  * The focused title's backdrop, full screen behind everything (the nav bar too) and above the grid backdrop, while a
- * carousel tab is open. Two image views take turns, so one fades in over the other; a fixed scrim keeps the text
+ * nav tab other than Home is open. Two image views take turns, so one fades in over the other; a fixed scrim keeps the text
  * readable. A new backdrop loads only once the focus has rested for {@link #SETTLE_MS}, so running along the row
  * decodes nothing for the cards it passes.
  */
@@ -29,7 +29,7 @@ final class Backdrop {
 
     /** The view showing the current backdrop; the other one is the next to fade in. */
     private int front;
-    /** What the carousel asked for last, and what is on screen; null for none. */
+    /** What the hero asked for last, and what is on screen; null for none. */
     @Nullable private String wanted;
     @Nullable private String shown;
 

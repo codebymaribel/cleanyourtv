@@ -6,4 +6,6 @@
     <string name="nav_watchlist" translatable="false">Watchlist</string>
     <string name="nav_friends" translatable="false">Friends</string>
     <string name="nav_empty" translatable="false">Nada por acá todavía</string>
+    <string name="open_in_stremio" translatable="false">Abrir en Stremio</string>
+    <string name="trailer" translatable="false">Tráiler</string>
 </resources>

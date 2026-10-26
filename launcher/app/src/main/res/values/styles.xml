@@ -26,6 +26,15 @@
     </style>
     <style name="TopButton" parent="TopButtonBase" />
 
+    <!-- Hero button (nav_tabs): a pill like the top bar's, white when focused. -->
+    <style name="HeroButton" parent="TopButtonBase">
+        <item name="android:layout_marginStart">0dp</item>
+        <item name="android:layout_marginEnd">12dp</item>
+        <item name="android:paddingStart">18dp</item>
+        <item name="android:paddingEnd">22dp</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
     <!-- Nav bar tab (nav_tabs): plain text, with a line under the selected tab (nav_tab_bg). -->
     <style name="NavTab" parent="TopButtonBase">
         <item name="android:layout_marginStart">0dp</item>

@@ -1,18 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Sizes for this fork's own features, kept apart from upstream's resources. -->
 <resources>
-    <!-- Carousel (nav_tabs): 2:3 posters, the focused one on a keyline at the list's start padding (further right
-         from the second card on, so a slice of the one before shows). -->
-    <dimen name="carousel_keyline">10dp</dimen>
-    <dimen name="carousel_card_width">180dp</dimen>
-    <dimen name="carousel_card_height">270dp</dimen>
-    <dimen name="carousel_corner">5dp</dimen>
-    <!-- Space above the posters' top edge, which every card shares: the focused one grows right and down. -->
-    <dimen name="carousel_top">34dp</dimen>
-    <dimen name="carousel_spacing">16dp</dimen>
-    <dimen name="carousel_gap">24dp</dimen>
-    <dimen name="carousel_detail_width">360dp</dimen>
-    <!-- The row's fixed height: carousel_top, the focused card at 1.2 x 270dp, and 16dp under it. Fixed, not
-         wrap_content, so setHasFixedSize holds and a list change never re-measures the row. -->
-    <dimen name="carousel_height">374dp</dimen>
+    <!-- Nav tab row (nav_tabs): 2:3 posters in one row under the hero. -->
+    <dimen name="title_card_width">96dp</dimen>
+    <dimen name="title_card_height">144dp</dimen>
+    <dimen name="title_card_margin">8dp</dimen>
+    <dimen name="title_card_corner">5dp</dimen>
+    <!-- The row: a card plus its margins, which leave room for the focused card's scale. -->
+    <dimen name="title_row_height">160dp</dimen>
+    <!-- The hero over the row: the focused title's name, details, summary and buttons. -->
+    <dimen name="title_hero_width">560dp</dimen>
 </resources>

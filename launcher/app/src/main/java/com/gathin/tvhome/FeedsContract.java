@@ -24,9 +24,16 @@ final class FeedsContract {
     static final String COLUMN_HAS_POSTER = "has_poster";
     /** 1 when the title has a backdrop saved. */
     static final String COLUMN_HAS_BACKDROP = "has_backdrop";
+    static final String COLUMN_YEAR = "year";
+    /** Up to three genres, already joined with ", ". */
+    static final String COLUMN_GENRES = "genres";
+    static final String COLUMN_RUNTIME = "runtime";
+    /** The trailer's YouTube video id, "" when there is none. */
+    static final String COLUMN_TRAILER = "trailer";
 
     static final String[] COLUMNS = {
-            COLUMN_TYPE, COLUMN_ID, COLUMN_TITLE, COLUMN_SUMMARY, COLUMN_HAS_POSTER, COLUMN_HAS_BACKDROP};
+            COLUMN_TYPE, COLUMN_ID, COLUMN_TITLE, COLUMN_SUMMARY, COLUMN_HAS_POSTER, COLUMN_HAS_BACKDROP,
+            COLUMN_YEAR, COLUMN_GENRES, COLUMN_RUNTIME, COLUMN_TRAILER};
 
     private FeedsContract() {
     }

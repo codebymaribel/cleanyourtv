@@ -1,6 +1,6 @@
 package com.gathin.tvhome;
 
-/** How much memory the carousel's poster cache may use. Plain Java, so the JVM tests can check it. */
+/** How much memory the nav tabs' poster cache may use. Plain Java, so the JVM tests can check it. */
 final class PosterMemory {
 
     /** Never more than 16 MB: about 28 posters, more than a tab shows, on a TV with little memory to spare. */

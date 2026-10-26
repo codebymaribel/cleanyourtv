@@ -181,7 +181,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** nav_tabs: the bar in the clock's place and the panel shown in the grid's place; null when off. */
     private NavBar navBar;
     private View tabPanel;
-    private Carousel carousel;
+    private TitleBrowser titles;
     private PosterLoader posterLoader;
     private PosterLoader backdropLoader;
     private Backdrop backdrop;
@@ -969,7 +969,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // nav_tabs: the companion app was installed after Home started, so nothing was watching its syncs yet.
         if (navBar != null && feedsObserver == null) {
             watchFeeds();
-            if (feedsObserver != null) carousel.reload();
+            if (feedsObserver != null) titles.reload();
         }
         // A festival that started or ended while Home was in the background: rebuild with or without it.
         if (festive != festival.active(LocalDate.now())) {
@@ -1161,7 +1161,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             int pos = adapter.positionOf(returnKey);
             if (returnToLibrary || libraryFocusPending) focusLibrary();
             else if (navBar != null && !navBar.onHome()) {
-                if (!carousel.focus()) navBar.focusSelected();   // back on the card that was opened
+                if (!titles.restoreFocus()) navBar.focusSelected();   // back on the card or button that opened it
             }
             else focusTile(pos >= 0 ? pos : returnSlot);
             tilesReady = true;
@@ -1249,7 +1249,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         super.onDestroy();
         unregisterReceiver(packageReceiver);
         wallpaperPlayer.close();
-        if (carousel != null) carousel.shutdown();
+        if (titles != null) titles.shutdown();
         if (posterLoader != null) posterLoader.shutdown();
         if (backdropLoader != null) backdropLoader.shutdown();
         if (backdrop != null) backdrop.shutdown();
@@ -2351,20 +2351,26 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (child != bar) child.setVisibility(View.GONE);
         }
         tabPanel = findViewById(R.id.tabPanel);
-        posterLoader = new ProviderPosterLoader(getContentResolver(), PosterMemory.budget(Runtime.getRuntime().maxMemory()));
+        // The grid's cards are about half the size the posters are stored at: decode them at half.
+        posterLoader = new ProviderPosterLoader(getContentResolver(), PosterMemory.budget(Runtime.getRuntime().maxMemory()), 2);
         // Backdrops decode to about 1 MB each (960 x 540, RGB_565): keep the last few, for moving back and forth.
-        backdropLoader = new ProviderPosterLoader(getContentResolver(), PosterMemory.BACKDROP_BYTES);
+        backdropLoader = new ProviderPosterLoader(getContentResolver(), PosterMemory.BACKDROP_BYTES, 1);
         backdrop = new Backdrop(findViewById(R.id.backdrop), backdropLoader, animations && !reducedMotion);
-        carousel = new Carousel(tabPanel, new ProviderCatalogSource(getContentResolver()), posterLoader,
-                animations && !reducedMotion, new Carousel.Host() {
+        titles = new TitleBrowser(tabPanel, new ProviderCatalogSource(getContentResolver()), posterLoader,
+                animations && !reducedMotion, new TitleBrowser.Host() {
             @Override
-            public void onCarouselUp() {
+            public void onLeaveUp() {
                 navBar.focusSelected();
             }
 
             @Override
             public void openItem(@NonNull CatalogItem item) {
                 openInStremio(item);
+            }
+
+            @Override
+            public void playTrailer(@NonNull CatalogItem item) {
+                openTrailer(item);
             }
 
             @Override
@@ -2382,9 +2388,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
             @Override
             public void onTabEnter(int tab) {
-                // Home: back to the dock tile Up came from. The other tabs: the card the carousel was last on.
+                // Home: back to the dock tile Up came from. The other tabs: the hero's Open in Stremio button.
                 if (NavTabs.showsGrid(tab)) focusTile(singleRow ? lastFocused : lastFocused % COLUMNS);
-                else carousel.focus();
+                else titles.focusHero();
             }
 
             @Override
@@ -2407,12 +2413,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             backdrop.hide();
         } else {
             hideHero();
-            carousel.show(tab);
+            titles.show(tab);
         }
     }
 
     /**
-     * Reloads the carousel when the companion app says a sync finished. Registering fails when the app is not
+     * Reloads the nav tabs' titles when the companion app says a sync finished. Registering fails when the app is not
      * installed (there is no provider to watch); the tabs are empty then anyway, and onResume tries again.
      */
     private void watchFeeds() {
@@ -2421,7 +2427,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             public void onChange(boolean selfChange) {
                 posterLoader.clear();
                 backdropLoader.clear();
-                carousel.reload();
+                titles.reload();
             }
         };
         try {
@@ -2431,7 +2437,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
     }
 
-    /** OK on a carousel card: the title's page in Stremio, which for a movie is its list of streams. */
+    /** The Trailer button: the trailer in the YouTube app. */
+    private void openTrailer(CatalogItem item) {
+        String link = YouTubeLinks.watch(item.trailerId);
+        if (link == null) return;
+        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+        i.setPackage(YouTubeLinks.PACKAGE);
+        open(i);
+    }
+
+    /** OK on a card, or Open in Stremio: the title's page in Stremio, which for a movie is its list of streams. */
     private void openInStremio(CatalogItem item) {
         String link = StremioLinks.detail(item.type, item.id);
         if (link == null) return;

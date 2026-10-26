@@ -30,13 +30,20 @@ final class ProviderCatalogSource implements CatalogSource {
             int title = c.getColumnIndexOrThrow(FeedsContract.COLUMN_TITLE);
             int summary = c.getColumnIndexOrThrow(FeedsContract.COLUMN_SUMMARY);
             int hasPoster = c.getColumnIndexOrThrow(FeedsContract.COLUMN_HAS_POSTER);
-            int hasBackdrop = c.getColumnIndex(FeedsContract.COLUMN_HAS_BACKDROP);   // -1 from an older app
+            // Columns an older app does not have yet: -1, read as empty.
+            int hasBackdrop = c.getColumnIndex(FeedsContract.COLUMN_HAS_BACKDROP);
+            int year = c.getColumnIndex(FeedsContract.COLUMN_YEAR);
+            int genres = c.getColumnIndex(FeedsContract.COLUMN_GENRES);
+            int runtime = c.getColumnIndex(FeedsContract.COLUMN_RUNTIME);
+            int trailer = c.getColumnIndex(FeedsContract.COLUMN_TRAILER);
             List<CatalogItem> items = new ArrayList<>(c.getCount());
             while (c.moveToNext()) {
                 String itemId = text(c, id);
                 String poster = c.getInt(hasPoster) == 1 ? FeedsContract.poster(tab, itemId) : null;
                 String backdrop = hasBackdrop >= 0 && c.getInt(hasBackdrop) == 1 ? FeedsContract.backdrop(itemId) : null;
-                items.add(new CatalogItem(text(c, type), itemId, text(c, title), text(c, summary), poster, backdrop));
+                String trailerId = text(c, trailer);
+                items.add(new CatalogItem(text(c, type), itemId, text(c, title), text(c, summary), poster, backdrop,
+                        text(c, year), text(c, genres), text(c, runtime), trailerId.isEmpty() ? null : trailerId));
             }
             return items;
         } catch (SecurityException | IllegalArgumentException e) {
@@ -46,6 +53,7 @@ final class ProviderCatalogSource implements CatalogSource {
     }
 
     private static String text(Cursor c, int column) {
+        if (column < 0) return "";
         String value = c.getString(column);
         return value == null ? "" : value;
     }

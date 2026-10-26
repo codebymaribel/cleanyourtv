@@ -25,12 +25,18 @@ import java.util.function.Consumer;
 final class ProviderPosterLoader implements PosterLoader {
 
     private final ContentResolver resolver;
+    private final int sampleSize;
     private final LruCache<String, Bitmap> cache;
     private final ExecutorService decoder = Executors.newSingleThreadExecutor();
     private final Handler main = new Handler(Looper.getMainLooper());
 
-    ProviderPosterLoader(@NonNull ContentResolver resolver, int budgetBytes) {
+    /**
+     * @param sampleSize decode at 1/sampleSize of the stored size: 2 for the grid's cards, about half the focused
+     *                   focused card size the posters are stored at, which takes a quarter of the memory.
+     */
+    ProviderPosterLoader(@NonNull ContentResolver resolver, int budgetBytes, int sampleSize) {
         this.resolver = resolver;
+        this.sampleSize = Math.max(1, sampleSize);
         cache = new LruCache<String, Bitmap>(Math.max(1, budgetBytes)) {
             @Override
             protected int sizeOf(String key, Bitmap value) {
@@ -71,6 +77,7 @@ final class ProviderPosterLoader implements PosterLoader {
     private Bitmap decode(String uri) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.RGB_565;
+        options.inSampleSize = sampleSize;
         try (InputStream in = resolver.openInputStream(Uri.parse(uri))) {
             return in == null ? null : BitmapFactory.decodeStream(in, null, options);
         } catch (IOException | SecurityException e) {

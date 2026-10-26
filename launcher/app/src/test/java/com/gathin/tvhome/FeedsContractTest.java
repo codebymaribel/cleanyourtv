@@ -17,8 +17,8 @@ public class FeedsContractTest {
 
     @Test
     public void theColumnsMatchTheAppInOrder() {
-        assertArrayEquals(new String[]{"type", "id", "title", "summary", "has_poster", "has_backdrop"},
-                FeedsContract.COLUMNS);
+        assertArrayEquals(new String[]{"type", "id", "title", "summary", "has_poster", "has_backdrop",
+                "year", "genres", "runtime", "trailer"}, FeedsContract.COLUMNS);
     }
 
     @Test
