@@ -36,6 +36,8 @@ SCREENSHOT_WANTED = {
     "tile_menu", "top_menu", "vpn_app", "wallpaper", "wallpaper_captions", "wallpaper_dim",
     "wallpaper_moods", "wallpaper_order", "wallpaper_true_color", "wifi_label_width",
     "wifi_status_color",
+    # Fork keys (codebymaribel/cleanyourtv): this fork is not published, so they carry no screenshot yet.
+    "dock_lift", "grid_backdrop_color", "nav_tabs", "resume_row",
 }
 
 
