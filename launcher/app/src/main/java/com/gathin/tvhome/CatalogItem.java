@@ -13,15 +13,15 @@ final class CatalogItem {
     @NonNull final String title;
     /** Shown in the detail panel next to the focused card; empty when there is none. */
     @NonNull final String summary;
-    /** Local poster file from the companion app; null until there is one, and the card draws a placeholder. */
-    @Nullable final String posterPath;
+    /** The poster's content URI in the companion app; null when it has none yet, and the card draws a placeholder. */
+    @Nullable final String posterUri;
 
     CatalogItem(@NonNull String type, @NonNull String id, @NonNull String title, @NonNull String summary,
-                @Nullable String posterPath) {
+                @Nullable String posterUri) {
         this.type = type;
         this.id = id;
         this.title = title;
         this.summary = summary;
-        this.posterPath = posterPath;
+        this.posterUri = posterUri;
     }
 }

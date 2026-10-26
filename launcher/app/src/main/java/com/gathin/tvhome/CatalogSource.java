@@ -5,8 +5,8 @@ import androidx.annotation.NonNull;
 import java.util.List;
 
 /**
- * Where a nav tab's titles come from. {@link FakeCatalogSource} for now; the companion app (Stremboxd catalogs and the
- * Stremio library, cached on the TV) replaces it, so the launcher itself never touches the network.
+ * Where a nav tab's titles come from: {@link ProviderCatalogSource}, which reads what the companion app synced, so
+ * the launcher itself never touches the network.
  */
 interface CatalogSource {
 

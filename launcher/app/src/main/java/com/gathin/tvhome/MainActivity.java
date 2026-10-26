@@ -17,6 +17,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ChangedPackages;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -180,6 +181,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private NavBar navBar;
     private View tabPanel;
     private Carousel carousel;
+    private PosterLoader posterLoader;
+    /** Told by the companion app when a sync finished; null when the app is not installed. */
+    private ContentObserver feedsObserver;
     private View btnInputs;
     /** config show_inputs_pill: false keeps the Inputs pill hidden even when the TV has inputs. */
     private boolean showInputsPill = true;
@@ -1238,6 +1242,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         unregisterReceiver(packageReceiver);
         wallpaperPlayer.close();
         if (carousel != null) carousel.shutdown();
+        if (posterLoader != null) posterLoader.shutdown();
+        if (feedsObserver != null) getContentResolver().unregisterContentObserver(feedsObserver);
         ConnectivityManager cm = getSystemService(ConnectivityManager.class);
         TvInputManager tim = (TvInputManager) getSystemService(TV_INPUT_SERVICE);
         if (tim != null) tim.unregisterCallback(inputCallback);
@@ -2335,7 +2341,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (child != bar) child.setVisibility(View.GONE);
         }
         tabPanel = findViewById(R.id.tabPanel);
-        carousel = new Carousel(tabPanel, new FakeCatalogSource(), animations && !reducedMotion, new Carousel.Host() {
+        posterLoader = new ProviderPosterLoader(getContentResolver(), PosterMemory.budget(Runtime.getRuntime().maxMemory()));
+        carousel = new Carousel(tabPanel, new ProviderCatalogSource(getContentResolver()), posterLoader,
+                animations && !reducedMotion, new Carousel.Host() {
             @Override
             public void onCarouselUp() {
                 navBar.focusSelected();
@@ -2346,6 +2354,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 openInStremio(item);
             }
         });
+        watchFeeds();
         navBar = new NavBar(bar, new NavBar.Listener() {
             @Override
             public void onTabSelected(int tab) {
@@ -2378,6 +2387,25 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (!home) {
             hideHero();
             carousel.show(tab);
+        }
+    }
+
+    /**
+     * Reloads the carousel when the companion app says a sync finished. Registering fails when the app is not
+     * installed (there is no provider to watch); the tabs are empty then anyway, and the next launch tries again.
+     */
+    private void watchFeeds() {
+        feedsObserver = new ContentObserver(handler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                posterLoader.clear();
+                carousel.reload();
+            }
+        };
+        try {
+            getContentResolver().registerContentObserver(Uri.parse(FeedsContract.root()), true, feedsObserver);
+        } catch (SecurityException e) {
+            feedsObserver = null;
         }
     }
 

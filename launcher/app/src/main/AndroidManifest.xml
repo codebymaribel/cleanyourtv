@@ -22,6 +22,14 @@
          this permission (protection level normal, so it is granted at install). Ignored on other TVs. -->
     <uses-permission android:name="yandex.tv.permission.ACCESS_TV_SOURCE" />
 
+    <!-- Fork: read the companion app's feeds (cleantv-feeds). A signature permission that app declares too, so
+         only apps signed with the same key read them, and either app can be installed first. -->
+    <permission
+        android:name="com.codebymaribel.feeds.permission.READ_FEEDS"
+        android:label="Read CleanTV feeds"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="com.codebymaribel.feeds.permission.READ_FEEDS" />
+
     <!-- Android 11+ package visibility: lets the launcher list the TV apps it shows as tiles, and the
          apps that declare a module card (docs/specs/card.md). -->
     <queries>
@@ -68,6 +76,8 @@
         <!-- Coocaa OS sources for the Inputs menu (coocaa_sources); see CoocaaSources. -->
         <provider android:authorities="com.skyworth.tv.provider" />
         <provider android:authorities="com.skyworth.tv.sdk.provider" />
+        <!-- Fork: the companion app whose provider serves the carousel's titles and posters. -->
+        <package android:name="com.codebymaribel.feeds" />
     </queries>
 
     <application

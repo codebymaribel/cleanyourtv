@@ -3,6 +3,7 @@ package com.gathin.tvhome;
 import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -29,7 +30,8 @@ import java.util.concurrent.Executors;
  * A nav tab's carousel (nav_tabs): posters in a row, the focused one bigger and tinted blue on a fixed keyline at the
  * left, its title and summary in a panel beside it. The cards after the focused one slide right to make room for the
  * panel through translationX, a property change on the GPU, never a layout pass. Titles come from a {@link
- * CatalogSource} on a background thread and are kept per tab, so moving between tabs loads each list once.
+ * CatalogSource} on a background thread and are kept per tab, so moving between tabs loads each list once; posters
+ * come from a {@link PosterLoader}, also off the main thread.
  */
 final class Carousel {
 
@@ -53,6 +55,7 @@ final class Carousel {
     private final View empty;
     private final Host host;
     private final CatalogSource source;
+    private final PosterLoader posters;
     private final boolean animate;
     private final Drawable tint = new ColorDrawable(TINT);
     private final Adapter adapter = new Adapter();
@@ -69,8 +72,10 @@ final class Carousel {
     /** The card whose title the panel shows; the cards after it are shifted. -1 when the list is empty. */
     private int current = -1;
 
-    Carousel(@NonNull View panel, @NonNull CatalogSource source, boolean animate, @NonNull Host host) {
+    Carousel(@NonNull View panel, @NonNull CatalogSource source, @NonNull PosterLoader posters, boolean animate,
+             @NonNull Host host) {
         this.source = source;
+        this.posters = posters;
         this.animate = animate;
         this.host = host;
         Resources res = panel.getResources();
@@ -131,11 +136,24 @@ final class Carousel {
         }
         setItems(Collections.emptyList());
         empty.setVisibility(View.GONE);   // loading, not empty
+        load(newTab);
+    }
+
+    /**
+     * New titles arrived (the companion app finished a sync): forget every tab's list and load the visible one
+     * again. The old cards stay on screen until the new ones are ready, and keep focus thanks to stable ids.
+     */
+    void reload() {
+        cache.clear();
+        if (NavTabs.isTab(tab)) load(tab);
+    }
+
+    private void load(int forTab) {
         loader.execute(() -> {
-            List<CatalogItem> loaded = source.load(newTab);
+            List<CatalogItem> loaded = source.load(forTab);
             main.post(() -> {
-                cache.put(newTab, loaded);
-                if (tab == newTab) setItems(loaded);
+                cache.put(forTab, loaded);
+                if (tab == forTab) setItems(loaded);
             });
         });
     }
@@ -262,6 +280,16 @@ final class Carousel {
     private final class Adapter extends RecyclerView.Adapter<Holder> {
         List<CatalogItem> items = Collections.emptyList();
 
+        Adapter() {
+            // Ids from the titles: a reload that keeps a title keeps its card, and the focus on it.
+            setHasStableIds(true);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return items.get(position).id.hashCode();
+        }
+
         @NonNull
         @Override
         public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -288,10 +316,7 @@ final class Carousel {
             CatalogItem item = items.get(position);
             holder.itemView.setContentDescription(item.title);
             holder.itemView.setBackgroundTintList(ColorStateList.valueOf(CarouselLayout.placeholderColor(item.title)));
-            // Posters arrive with the companion app; until then every card shows its title on its colour.
-            holder.poster.setImageDrawable(null);
-            holder.placeholder.setText(item.title);
-            holder.placeholder.setVisibility(View.VISIBLE);
+            bindPoster(holder, item);
             holder.itemView.setTranslationX(CarouselLayout.shiftFor(position, current, room));
             boolean focused = holder.itemView.isFocused();
             holder.itemView.setForeground(focused ? tint : null);
@@ -302,6 +327,33 @@ final class Carousel {
         @Override
         public int getItemCount() {
             return items.size();
+        }
+
+        /**
+         * The poster from memory when it is there, otherwise the title on its colour while the poster decodes in the
+         * background. The poster's tag holds the URI it is waiting for, so a card rebound to another title in the
+         * meantime ignores the late result.
+         */
+        private void bindPoster(Holder holder, CatalogItem item) {
+            String uri = item.posterUri;
+            holder.poster.setTag(uri);
+            Bitmap cached = uri == null ? null : posters.cached(uri);
+            if (cached != null) {
+                showPoster(holder, cached);
+                return;
+            }
+            holder.poster.setImageDrawable(null);
+            holder.placeholder.setText(item.title);
+            holder.placeholder.setVisibility(View.VISIBLE);
+            if (uri == null) return;
+            posters.load(uri, bitmap -> {
+                if (bitmap != null && uri.equals(holder.poster.getTag())) showPoster(holder, bitmap);
+            });
+        }
+
+        private void showPoster(Holder holder, Bitmap bitmap) {
+            holder.poster.setImageBitmap(bitmap);
+            holder.placeholder.setVisibility(View.GONE);
         }
     }
 
