@@ -963,6 +963,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onResume() {
         super.onResume();
+        // nav_tabs: the companion app was installed after Home started, so nothing was watching its syncs yet.
+        if (navBar != null && feedsObserver == null) {
+            watchFeeds();
+            if (feedsObserver != null) carousel.reload();
+        }
         // A festival that started or ended while Home was in the background: rebuild with or without it.
         if (festive != festival.active(LocalDate.now())) {
             recreate();
@@ -2392,7 +2397,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     /**
      * Reloads the carousel when the companion app says a sync finished. Registering fails when the app is not
-     * installed (there is no provider to watch); the tabs are empty then anyway, and the next launch tries again.
+     * installed (there is no provider to watch); the tabs are empty then anyway, and onResume tries again.
      */
     private void watchFeeds() {
         feedsObserver = new ContentObserver(handler) {
