@@ -298,6 +298,22 @@
                     </LinearLayout>
                 </LinearLayout>
 
+                <!-- Nav bar (nav_tabs): replaces the greeting, clock and date when on. Gone otherwise. -->
+                <LinearLayout
+                    android:id="@+id/navBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:visibility="gone">
+
+                    <TextView style="@style/NavTab" android:text="@string/nav_home" />
+                    <TextView style="@style/NavTab" android:text="@string/nav_popular" />
+                    <TextView style="@style/NavTab" android:text="@string/nav_watchlist" />
+                    <TextView style="@style/NavTab" android:text="@string/nav_friends" />
+                </LinearLayout>
+
             </LinearLayout>
 
             <!-- Shown only when show_stats is on. Outside leftBlock, so the top buttons stay level with the clock
@@ -399,6 +415,36 @@
                 android:overScrollMode="never"
                 android:scrollbars="none"
                 android:descendantFocusability="afterDescendants" />
+
+            <!-- A nav tab's content (nav_tabs), in the grid's place while a tab other than Home is selected. -->
+            <LinearLayout
+                android:id="@+id/tabPanel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingStart="14dp"
+                android:paddingTop="24dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tabPanelTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="34sp"
+                    android:fontFamily="@string/font_light"
+                    android:includeFontPadding="false"
+                    android:singleLine="true" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/nav_coming_soon"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="15sp"
+                    android:fontFamily="@string/font_regular" />
+            </LinearLayout>
         </FrameLayout>
     </LinearLayout>
 

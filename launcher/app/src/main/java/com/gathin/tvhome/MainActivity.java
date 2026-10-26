@@ -176,6 +176,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private boolean advancedEffects;
     private TextView greeting;
     private View clockBlock;
+    /** nav_tabs: the bar in the clock's place and the panel shown in the grid's place; null when off. */
+    private NavBar navBar;
+    private View tabPanel;
+    private TextView tabPanelTitle;
     private View btnInputs;
     /** config show_inputs_pill: false keeps the Inputs pill hidden even when the TV has inputs. */
     private boolean showInputsPill = true;
@@ -787,6 +791,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
             if (keyCode == KeyEvent.KEYCODE_DPAD_UP) return true;
             if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                if (navBar != null && !navBar.onHome()) return true;   // nav_tabs: no grid under another tab
                 // Back to the dock tile Up came from, not wherever the focus finder lands.
                 focusTile(singleRow ? lastFocused : lastFocused % COLUMNS);
                 return true;
@@ -794,7 +799,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             int firstButton = btnInputs.getVisibility() == View.VISIBLE ? R.id.btnInputs : firstTopButton().getId();
             int leftButton = rtlMenuBar ? R.id.btnSettings : firstButton;
             int rightButton = rtlMenuBar ? firstButton : R.id.btnSettings;
-            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) return v.getId() == leftButton;
+            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+                if (v.getId() == leftButton && navBar != null && !rtlMenuBar) {
+                    navBar.focusSelected();   // nav_tabs: the bar sits left of the pills
+                    return true;
+                }
+                return v.getId() == leftButton;
+            }
             return keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && v.getId() == rightButton;
         };
         btnInputs.setOnKeyListener(pillKeys);
@@ -814,6 +825,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
         }
         if (festive) applyFestiveSkin((TextView) btnInputs, (TextView) btnSettings);
+
+        if (cfg.navTabs) setUpNavTabs();
 
         // Hide the glass when focus leaves the tiles.
         getWindow().getDecorView().getViewTreeObserver().addOnGlobalFocusChangeListener((oldF, newF) -> {
@@ -916,6 +929,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (openLauncherSettingsIfAsked(intent)) return;
         if (openInputsIfAsked(intent)) return;
         if (intent == null || !intent.hasCategory(Intent.CATEGORY_HOME)) return;
+        if (navBar != null) navBar.select(NavTabs.HOME);
         grid.scrollToPosition(0);
         lastFocused = 0;
         lastFocusedKey = adapter.getItemCount() > 0 ? adapter.keyAt(0) : null;
@@ -1134,6 +1148,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         grid.post(() -> {
             int pos = adapter.positionOf(returnKey);
             if (returnToLibrary || libraryFocusPending) focusLibrary();
+            else if (navBar != null && !navBar.onHome()) navBar.focusSelected();
             else focusTile(pos >= 0 ? pos : returnSlot);
             tilesReady = true;
             startPendingSettingsReorder();
@@ -1590,7 +1605,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     public void onBackPressed() {
-        // Home screen: Back goes nowhere.
+        // Home screen: Back goes nowhere, except from a nav tab other than Home, which goes back to Home.
+        if (navBar != null) {
+            int to = NavTabs.back(navBar.selected());
+            if (to != NavTabs.NONE) navBar.focus(to);
+        }
     }
 
     // ---- glass highlight -------------------------------------------------------------------------
@@ -2247,7 +2266,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (singleRow) {
             // One row: Up leaves for the top bar, Down has nowhere to go, and Left/Right walk the whole row,
             // stopping at its two ends (the default focus search scrolls the row to the next tile).
-            if (keyCode == KeyEvent.KEYCODE_DPAD_UP) return false;
+            if (keyCode == KeyEvent.KEYCODE_DPAD_UP) return focusNavBar();
             if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) return true;
             boolean forward = rtlAppGrid ? keyCode == KeyEvent.KEYCODE_DPAD_LEFT : keyCode == KeyEvent.KEYCODE_DPAD_RIGHT;
             int last = adapter.focusablePosition(count - 1);
@@ -2271,7 +2290,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                     rtlAppGrid, keyCode == KeyEvent.KEYCODE_DPAD_LEFT);
         }
         if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
-            if (position < COLUMNS) return false;          // dock row: let focus move to the top bar
+            if (position < COLUMNS) return focusNavBar();  // dock row: the nav bar, or the focus finder picks the top bar
             target = position - COLUMNS;
         } else {
             int lastRowStart = ((count - 1) / COLUMNS) * COLUMNS;
@@ -2292,6 +2311,64 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         libraryFocusPending = false;
         hideGlass();
         hideHero();
+    }
+
+    /** Up from the dock with nav_tabs on: the selected tab. Off: false, so the focus finder picks the top bar. */
+    private boolean focusNavBar() {
+        if (navBar == null) return false;
+        navBar.focusSelected();
+        return true;
+    }
+
+    /** Titles for the tab panel, in NavTabs order. */
+    private static final int[] TAB_TITLES = {
+            R.string.nav_home, R.string.nav_popular, R.string.nav_watchlist, R.string.nav_friends};
+
+    /**
+     * nav_tabs: the nav bar takes the place of the greeting, clock and date (every other child of their block goes),
+     * and a panel takes the grid's place while a tab other than Home is selected.
+     */
+    private void setUpNavTabs() {
+        ViewGroup bar = findViewById(R.id.navBar);
+        ViewGroup block = (ViewGroup) clockBlock;
+        for (int i = 0; i < block.getChildCount(); i++) {
+            View child = block.getChildAt(i);
+            if (child != bar) child.setVisibility(View.GONE);
+        }
+        tabPanel = findViewById(R.id.tabPanel);
+        tabPanelTitle = findViewById(R.id.tabPanelTitle);
+        navBar = new NavBar(bar, new NavBar.Listener() {
+            @Override
+            public void onTabSelected(int tab) {
+                showTab(tab);
+            }
+
+            @Override
+            public void onTabEnter(int tab) {
+                // Home: back to the dock tile Up came from. The other tabs have nothing to focus until the carousel.
+                if (NavTabs.showsGrid(tab)) focusTile(singleRow ? lastFocused : lastFocused % COLUMNS);
+            }
+
+            @Override
+            public boolean onPastLastTab() {
+                View first = btnInputs.getVisibility() == View.VISIBLE ? btnInputs : firstTopButton();
+                return first.requestFocus();
+            }
+        });
+    }
+
+    /**
+     * Shows a tab's content. The grid goes INVISIBLE rather than GONE, so it keeps its size and bound tiles and
+     * coming back to Home needs no layout pass or rebind.
+     */
+    private void showTab(int tab) {
+        boolean home = NavTabs.showsGrid(tab);
+        grid.setVisibility(home ? View.VISIBLE : View.INVISIBLE);
+        tabPanel.setVisibility(home ? View.GONE : View.VISIBLE);
+        if (!home) {
+            hideHero();
+            tabPanelTitle.setText(TAB_TITLES[tab]);
+        }
     }
 
     /**
@@ -2471,7 +2548,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     private void updateClockVisibility() {
         boolean valid = System.currentTimeMillis() >= TIME_VALID_AFTER_MS;
-        clockBlock.setVisibility(valid ? View.VISIBLE : View.INVISIBLE);
+        // The nav bar lives in the clock's block and has nothing to do with the time, so it never hides.
+        clockBlock.setVisibility(valid || navBar != null ? View.VISIBLE : View.INVISIBLE);
         handler.removeCallbacks(clockCheck);
         if (valid) {
             updateGreeting();

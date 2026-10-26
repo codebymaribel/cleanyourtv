@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for this fork's own features, kept apart from strings.xml so upstream merges stay clean. -->
+<resources>
+    <string name="nav_home" translatable="false">Home</string>
+    <string name="nav_popular" translatable="false">Popular</string>
+    <string name="nav_watchlist" translatable="false">Watchlist</string>
+    <string name="nav_friends" translatable="false">Friends</string>
+    <string name="nav_coming_soon" translatable="false">Próximamente</string>
+</resources>

@@ -26,6 +26,17 @@
     </style>
     <style name="TopButton" parent="TopButtonBase" />
 
+    <!-- Nav bar tab (nav_tabs): plain text, with a line under the selected tab (nav_tab_bg). -->
+    <style name="NavTab" parent="TopButtonBase">
+        <item name="android:layout_marginStart">0dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+        <item name="android:background">@drawable/nav_tab_bg</item>
+        <item name="android:textColor">@drawable/nav_tab_text</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
     <!-- Icon-only pill: a 42dp circle (pill_bg's 21dp corners) with the 22dp icon centred by even padding. Give it a
          contentDescription, since there is no text. -->
     <style name="TopButtonIcon" parent="TopButtonBase">

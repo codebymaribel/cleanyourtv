@@ -417,6 +417,10 @@
          default: dark blue. Can also be set with "grid_backdrop_color": "#0B1020" in a theme's config.json
          ("" turns it off). It covers a wallpaper set on the background, so use one or the other. -->
     <string name="grid_backdrop_color" translatable="false">#0B1020</string>
+    <!-- Nav bar where the greeting, clock and date were: Home (the app grid), Popular, Watchlist and Friends. A tab
+         is selected as it takes focus. Fork default: on. Can also be set with "nav_tabs": false in a theme's
+         config.json. -->
+    <bool name="nav_tabs">true</bool>
     <!-- Where the TV is, in decimal degrees, so the sky's sunrise and sunset glows follow the real sun
          (computed on the TV, no network). Empty: a fixed temperate day, sunset glow around 19:00.
          Vilnius: 54.69 and 25.28. -->

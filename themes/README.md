@@ -103,6 +103,7 @@ A new key needs one there in the same pull request.
 | `handle_view_inputs` | bool | Answer the system input switcher (`VIEW_INPUTS`, what the remote's Input button becomes) with the Inputs menu, for sets whose stock launcher was its only handler (Hisense huangshan); `false` by default so a TV with its own input picker never gets a chooser |
 | `background_color` | `#RRGGBB` | Colour behind everything; black by default |
 | `sky_intensity` | 0 to 100 | Time-of-day backdrop: a dark gradient that follows the clock, 0 hides it (default) |
+| `nav_tabs` | bool | Nav bar in place of the greeting, clock and date: Home (the app grid), Popular, Watchlist and Friends, selected as each takes focus (`true` in this fork) |
 | `grid_backdrop_color` | `#RRGGBB` | Grid backdrop: this colour at the centre fading radially to `background_color`, under a faint white 3 x 3 grid; `""` turns it off. Covers a wallpaper, so use one or the other |
 | `wallpaper` | bool | Show the theme's picture, `wallpaper.jpg` or its `wallpapers/` collection (`true`), or draw neither (`false`) |
 | `wallpaper_rotation_minutes` | 0 to 1440 | Rotate images in the theme's `wallpapers/` folder at this interval; 0 keeps the single-image behaviour. A negative or non-numeric value is ignored, and 0 means "no rotation", not "every minute" |
