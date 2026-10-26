@@ -20,6 +20,11 @@ public class PosterMemoryTest {
     }
 
     @Test
+    public void theBackdropCacheHoldsFourFullBackdrops() {
+        assertEquals(4 * 960 * 540 * 2, PosterMemory.BACKDROP_BYTES);
+    }
+
+    @Test
     public void nonsenseGivesNoCache() {
         assertEquals(0, PosterMemory.budget(-1));
     }

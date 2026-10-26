@@ -72,6 +72,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.dynamicanimation.animation.FloatPropertyCompat;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
@@ -182,6 +183,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private View tabPanel;
     private Carousel carousel;
     private PosterLoader posterLoader;
+    private PosterLoader backdropLoader;
+    private Backdrop backdrop;
     /** Told by the companion app when a sync finished; null when the app is not installed. */
     private ContentObserver feedsObserver;
     private View btnInputs;
@@ -1248,6 +1251,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         wallpaperPlayer.close();
         if (carousel != null) carousel.shutdown();
         if (posterLoader != null) posterLoader.shutdown();
+        if (backdropLoader != null) backdropLoader.shutdown();
+        if (backdrop != null) backdrop.shutdown();
         if (feedsObserver != null) getContentResolver().unregisterContentObserver(feedsObserver);
         ConnectivityManager cm = getSystemService(ConnectivityManager.class);
         TvInputManager tim = (TvInputManager) getSystemService(TV_INPUT_SERVICE);
@@ -2347,6 +2352,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
         tabPanel = findViewById(R.id.tabPanel);
         posterLoader = new ProviderPosterLoader(getContentResolver(), PosterMemory.budget(Runtime.getRuntime().maxMemory()));
+        // Backdrops decode to about 1 MB each (960 x 540, RGB_565): keep the last few, for moving back and forth.
+        backdropLoader = new ProviderPosterLoader(getContentResolver(), PosterMemory.BACKDROP_BYTES);
+        backdrop = new Backdrop(findViewById(R.id.backdrop), backdropLoader, animations && !reducedMotion);
         carousel = new Carousel(tabPanel, new ProviderCatalogSource(getContentResolver()), posterLoader,
                 animations && !reducedMotion, new Carousel.Host() {
             @Override
@@ -2357,6 +2365,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             @Override
             public void openItem(@NonNull CatalogItem item) {
                 openInStremio(item);
+            }
+
+            @Override
+            public void onItemShown(@Nullable CatalogItem item) {
+                if (navBar == null || navBar.onHome()) return;   // a late list for a tab that is no longer open
+                backdrop.show(item == null ? null : item.backdropUri);
             }
         });
         watchFeeds();
@@ -2389,7 +2403,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         boolean home = NavTabs.showsGrid(tab);
         grid.setVisibility(home ? View.VISIBLE : View.INVISIBLE);
         tabPanel.setVisibility(home ? View.GONE : View.VISIBLE);
-        if (!home) {
+        if (home) {
+            backdrop.hide();
+        } else {
             hideHero();
             carousel.show(tab);
         }
@@ -2404,6 +2420,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             @Override
             public void onChange(boolean selfChange) {
                 posterLoader.clear();
+                backdropLoader.clear();
                 carousel.reload();
             }
         };

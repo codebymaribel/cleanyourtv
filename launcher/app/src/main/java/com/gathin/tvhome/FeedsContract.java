@@ -14,6 +14,7 @@ final class FeedsContract {
 
     static final String PATH_FEED = "feed";
     static final String PATH_POSTER = "poster";
+    static final String PATH_BACKDROP = "backdrop";
 
     static final String COLUMN_TYPE = "type";
     static final String COLUMN_ID = "id";
@@ -21,8 +22,11 @@ final class FeedsContract {
     static final String COLUMN_SUMMARY = "summary";
     /** 1 when the title has a poster saved, 0 when the card draws its placeholder. */
     static final String COLUMN_HAS_POSTER = "has_poster";
+    /** 1 when the title has a backdrop saved. */
+    static final String COLUMN_HAS_BACKDROP = "has_backdrop";
 
-    static final String[] COLUMNS = {COLUMN_TYPE, COLUMN_ID, COLUMN_TITLE, COLUMN_SUMMARY, COLUMN_HAS_POSTER};
+    static final String[] COLUMNS = {
+            COLUMN_TYPE, COLUMN_ID, COLUMN_TITLE, COLUMN_SUMMARY, COLUMN_HAS_POSTER, COLUMN_HAS_BACKDROP};
 
     private FeedsContract() {
     }
@@ -40,5 +44,10 @@ final class FeedsContract {
     /** One title's poster in a tab (the same title can have a different poster in another tab). */
     static String poster(int tab, String id) {
         return root() + "/" + PATH_POSTER + "/" + tab + "/" + id;
+    }
+
+    /** One title's backdrop, the same in every tab. */
+    static String backdrop(String id) {
+        return root() + "/" + PATH_BACKDROP + "/" + id;
     }
 }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Darkens the backdrop where text sits: the nav bar at the top, the detail panel at the left and the posters at the
+     bottom. Drawn once; only its alpha animates. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient android:angle="0" android:startColor="#E6000000" android:centerColor="#80000000"
+                android:endColor="#1A000000" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient android:angle="270" android:startColor="#99000000" android:centerColor="#00000000"
+                android:endColor="#CC000000" />
+        </shape>
+    </item>
+</layer-list>

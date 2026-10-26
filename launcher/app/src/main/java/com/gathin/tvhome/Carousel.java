@@ -5,8 +5,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.SparseArray;
@@ -18,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,7 +26,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * A nav tab's carousel (nav_tabs): posters in a row, the focused one bigger and tinted blue on a fixed keyline at the
+ * A nav tab's carousel (nav_tabs): posters in a row, the focused one bigger, untinted, on a fixed keyline at the
  * left, its title and summary in a panel beside it. The cards after the focused one slide right to make room for the
  * panel through translationX, a property change on the GPU, never a layout pass. Titles come from a {@link
  * CatalogSource} on a background thread and are kept per tab, so moving between tabs loads each list once; posters
@@ -42,10 +41,11 @@ final class Carousel {
 
         /** OK on a card: open its title. */
         void openItem(@NonNull CatalogItem item);
+
+        /** The detail panel now shows this title; null when the tab has none. */
+        void onItemShown(@Nullable CatalogItem item);
     }
 
-    /** Blue over the focused card's poster. */
-    private static final int TINT = 0x4D2E6BFF;
     private static final long ANIM_MS = 180;
 
     private final RecyclerView list;
@@ -57,7 +57,6 @@ final class Carousel {
     private final CatalogSource source;
     private final PosterLoader posters;
     private final boolean animate;
-    private final Drawable tint = new ColorDrawable(TINT);
     private final Adapter adapter = new Adapter();
     private final ExecutorService loader = Executors.newSingleThreadExecutor();
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -186,6 +185,8 @@ final class Carousel {
             ((LinearLayoutManager) list.getLayoutManager()).scrollToPositionWithOffset(position, offsetFor(position));
             detail.setTranslationX(offsetFor(position));
             showDetail(items.get(position), false);
+        } else {
+            host.onItemShown(null);
         }
     }
 
@@ -239,6 +240,7 @@ final class Carousel {
         detailTitle.setText(item.title);
         detailSummary.setText(item.summary);
         detailSummary.setVisibility(item.summary.isEmpty() ? View.GONE : View.VISIBLE);
+        host.onItemShown(item);
         if (fade) {
             detail.setAlpha(0f);
             detail.animate().alpha(1f).setDuration(ANIM_MS).start();   // runs beside the slide, not instead of it
@@ -248,7 +250,6 @@ final class Carousel {
     }
 
     private void setFocusedLook(View card, boolean focused) {
-        card.setForeground(focused ? tint : null);
         float scale = focused ? CarouselLayout.FOCUS_SCALE : 1f;
         if (animate) card.animate().scaleX(scale).scaleY(scale).setDuration(ANIM_MS).start();
         else {
@@ -319,7 +320,6 @@ final class Carousel {
             bindPoster(holder, item);
             holder.itemView.setTranslationX(CarouselLayout.shiftFor(position, current, room));
             boolean focused = holder.itemView.isFocused();
-            holder.itemView.setForeground(focused ? tint : null);
             holder.itemView.setScaleX(focused ? CarouselLayout.FOCUS_SCALE : 1f);
             holder.itemView.setScaleY(focused ? CarouselLayout.FOCUS_SCALE : 1f);
         }

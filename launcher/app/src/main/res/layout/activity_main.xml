@@ -13,6 +13,40 @@
         android:visibility="gone"
         android:importantForAccessibility="no" />
 
+    <!-- The focused carousel title's backdrop (nav_tabs), full screen over the grid backdrop and under everything else.
+         Two images take turns for the cross-fade; the scrim keeps the text readable. All at alpha 0 until a backdrop
+         shows, and gone when nav_tabs is off. -->
+    <FrameLayout
+        android:id="@+id/backdrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:importantForAccessibility="no">
+
+        <ImageView
+            android:id="@+id/backdropA"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:alpha="0"
+            android:importantForAccessibility="no" />
+
+        <ImageView
+            android:id="@+id/backdropB"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:alpha="0"
+            android:importantForAccessibility="no" />
+
+        <View
+            android:id="@+id/backdropScrim"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/backdrop_scrim"
+            android:alpha="0" />
+    </FrameLayout>
+
     <!-- Time-of-day backdrop, drawn once a minute (config.xml sky_intensity; 0 keeps it hidden). -->
     <com.gathin.tvhome.SkyView
         android:id="@+id/sky"

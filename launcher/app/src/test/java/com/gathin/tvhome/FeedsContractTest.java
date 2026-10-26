@@ -17,7 +17,8 @@ public class FeedsContractTest {
 
     @Test
     public void theColumnsMatchTheAppInOrder() {
-        assertArrayEquals(new String[]{"type", "id", "title", "summary", "has_poster"}, FeedsContract.COLUMNS);
+        assertArrayEquals(new String[]{"type", "id", "title", "summary", "has_poster", "has_backdrop"},
+                FeedsContract.COLUMNS);
     }
 
     @Test
@@ -26,5 +27,6 @@ public class FeedsContractTest {
         assertEquals("content://com.codebymaribel.feeds.provider/feed/2", FeedsContract.feed(NavTabs.WATCHLIST));
         assertEquals("content://com.codebymaribel.feeds.provider/poster/3/tt0091064",
                 FeedsContract.poster(NavTabs.FRIENDS, "tt0091064"));
+        assertEquals("content://com.codebymaribel.feeds.provider/backdrop/tt0091064", FeedsContract.backdrop("tt0091064"));
     }
 }

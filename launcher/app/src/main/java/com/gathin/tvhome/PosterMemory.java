@@ -6,6 +6,9 @@ final class PosterMemory {
     /** Never more than 16 MB: about 28 posters, more than a tab shows, on a TV with little memory to spare. */
     static final int MAX_BYTES = 16 * 1024 * 1024;
 
+    /** The backdrop cache: four 960 x 540 RGB_565 backdrops, about 1 MB each. */
+    static final int BACKDROP_BYTES = 4 * 960 * 540 * 2;
+
     private PosterMemory() {
     }
 

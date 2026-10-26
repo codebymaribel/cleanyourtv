@@ -15,13 +15,16 @@ final class CatalogItem {
     @NonNull final String summary;
     /** The poster's content URI in the companion app; null when it has none yet, and the card draws a placeholder. */
     @Nullable final String posterUri;
+    /** The title's wide still in the companion app, shown full screen behind the carousel; null without one. */
+    @Nullable final String backdropUri;
 
     CatalogItem(@NonNull String type, @NonNull String id, @NonNull String title, @NonNull String summary,
-                @Nullable String posterUri) {
+                @Nullable String posterUri, @Nullable String backdropUri) {
         this.type = type;
         this.id = id;
         this.title = title;
         this.summary = summary;
         this.posterUri = posterUri;
+        this.backdropUri = backdropUri;
     }
 }

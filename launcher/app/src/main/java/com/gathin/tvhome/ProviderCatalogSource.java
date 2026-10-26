@@ -30,11 +30,13 @@ final class ProviderCatalogSource implements CatalogSource {
             int title = c.getColumnIndexOrThrow(FeedsContract.COLUMN_TITLE);
             int summary = c.getColumnIndexOrThrow(FeedsContract.COLUMN_SUMMARY);
             int hasPoster = c.getColumnIndexOrThrow(FeedsContract.COLUMN_HAS_POSTER);
+            int hasBackdrop = c.getColumnIndex(FeedsContract.COLUMN_HAS_BACKDROP);   // -1 from an older app
             List<CatalogItem> items = new ArrayList<>(c.getCount());
             while (c.moveToNext()) {
                 String itemId = text(c, id);
                 String poster = c.getInt(hasPoster) == 1 ? FeedsContract.poster(tab, itemId) : null;
-                items.add(new CatalogItem(text(c, type), itemId, text(c, title), text(c, summary), poster));
+                String backdrop = hasBackdrop >= 0 && c.getInt(hasBackdrop) == 1 ? FeedsContract.backdrop(itemId) : null;
+                items.add(new CatalogItem(text(c, type), itemId, text(c, title), text(c, summary), poster, backdrop));
             }
             return items;
         } catch (SecurityException | IllegalArgumentException e) {
