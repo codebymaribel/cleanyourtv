@@ -15,6 +15,7 @@ final class FeedsContract {
     static final String PATH_FEED = "feed";
     static final String PATH_POSTER = "poster";
     static final String PATH_BACKDROP = "backdrop";
+    static final String PATH_RESUME = "resume";
 
     static final String COLUMN_TYPE = "type";
     static final String COLUMN_ID = "id";
@@ -30,6 +31,14 @@ final class FeedsContract {
     static final String COLUMN_RUNTIME = "runtime";
     /** The trailer's YouTube video id, "" when there is none. */
     static final String COLUMN_TRAILER = "trailer";
+
+    /** The video to resume: the movie's id, or "tt...:season:episode"; "" when unknown. */
+    static final String COLUMN_VIDEO_ID = "video_id";
+    /** How far in, 0 to 1000. */
+    static final String COLUMN_PROGRESS = "progress";
+
+    static final String[] RESUME_COLUMNS = {
+            COLUMN_TYPE, COLUMN_ID, COLUMN_VIDEO_ID, COLUMN_TITLE, COLUMN_PROGRESS, COLUMN_HAS_BACKDROP};
 
     /** ContentResolver.call method: the app syncs when its data is older than 30 minutes. */
     static final String METHOD_SYNC_IF_STALE = "sync_if_stale";
@@ -54,6 +63,11 @@ final class FeedsContract {
     /** One title's poster in a tab (the same title can have a different poster in another tab). */
     static String poster(int tab, String id) {
         return root() + "/" + PATH_POSTER + "/" + tab + "/" + id;
+    }
+
+    /** The Stremio library's Continue Watching, latest first. */
+    static String resume() {
+        return root() + "/" + PATH_RESUME;
     }
 
     /** One title's backdrop, the same in every tab. */

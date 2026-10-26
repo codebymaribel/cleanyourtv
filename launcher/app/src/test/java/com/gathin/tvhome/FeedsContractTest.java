@@ -22,6 +22,13 @@ public class FeedsContractTest {
     }
 
     @Test
+    public void theResumePathAndColumnsMatchTheApp() {
+        assertEquals("content://com.codebymaribel.feeds.provider/resume", FeedsContract.resume());
+        assertArrayEquals(new String[]{"type", "id", "video_id", "title", "progress", "has_backdrop"},
+                FeedsContract.RESUME_COLUMNS);
+    }
+
+    @Test
     public void theSyncRequestMethodMatchesTheApp() {
         assertEquals("sync_if_stale", FeedsContract.METHOD_SYNC_IF_STALE);
     }

@@ -3,9 +3,8 @@ package com.gathin.tvhome;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-/** Plain JVM tests for moving along the row of posters. */
+/** Plain JVM tests for stepping along a row. */
 public class TitleRowLayoutTest {
 
     @Test
@@ -33,15 +32,5 @@ public class TitleRowLayoutTest {
         assertEquals(4, TitleRowLayout.clamp(9, 5));
         assertEquals(0, TitleRowLayout.clamp(-3, 5));
         assertEquals(0, TitleRowLayout.clamp(3, 0));
-    }
-
-    @Test
-    public void aTitleAlwaysGetsTheSamePlaceholderColour() {
-        int c = TitleRowLayout.placeholderColor("Black Swan");
-        assertEquals(c, TitleRowLayout.placeholderColor("Black Swan"));
-        boolean inPalette = false;
-        for (int p : TitleRowLayout.PLACEHOLDER_COLORS) inPalette |= p == c;
-        assertTrue(inPalette);
-        TitleRowLayout.placeholderColor(null);
     }
 }

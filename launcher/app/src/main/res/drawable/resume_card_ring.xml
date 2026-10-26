@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A Continue Watching card's focus ring: a white edge while it is focused (ResumeRow sets it activated). -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_activated="true">
+        <shape android:shape="rectangle">
+            <stroke android:width="2dp" android:color="#FFFFFFFF" />
+            <corners android:radius="@dimen/title_card_corner" />
+        </shape>
+    </item>
+    <item android:drawable="@android:color/transparent" />
+</selector>

@@ -450,8 +450,44 @@
                 android:scrollbars="none"
                 android:descendantFocusability="afterDescendants" />
 
-            <!-- A nav tab's titles (nav_tabs), in the grid's place while a tab other than Home is selected: the hero with
-                 the focused title fills the top, its text resting on one row of every poster that scrolls sideways. -->
+            <!-- Home's Continue Watching row (resume_row), under the dock at the bottom of the grid's area. The dock moves
+                 up by resume_block_height + resume_block_bottom while it shows; gone when empty or off. -->
+            <LinearLayout
+                android:id="@+id/resumeBlock"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/resume_block_height"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="@dimen/resume_block_bottom"
+                android:orientation="vertical"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="18dp"
+                    android:text="@string/continue_watching"
+                    android:textColor="#D9FFFFFF"
+                    android:textSize="15sp"
+                    android:fontFamily="@string/font_medium" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/resumeRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/resume_row_height"
+                    android:layout_marginTop="6dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:overScrollMode="never"
+                    android:scrollbars="none" />
+            </LinearLayout>
+
+            <!-- A nav tab's titles (nav_tabs), in the grid's place while a tab other than Home is selected: one title at a
+                 time over its backdrop, its text at the bottom, and under the buttons a dash per title. The dashes are
+                 the carousel: focused, Left and Right change the title. -->
             <LinearLayout
                 android:id="@+id/tabPanel"
                 android:layout_width="match_parent"
@@ -461,14 +497,29 @@
                 android:clipToPadding="false"
                 android:visibility="gone">
 
-                <!-- Takes the height the row leaves, its text resting on the posters, so the space sits under the nav. -->
+                <!-- The space above the text: the backdrop shows through. -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/titleEmpty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginBottom="40dp"
+                    android:text="@string/nav_empty"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="15sp"
+                    android:fontFamily="@string/font_regular"
+                    android:visibility="gone" />
+
                 <LinearLayout
                     android:id="@+id/titleHero"
                     android:layout_width="@dimen/title_hero_width"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
                     android:paddingStart="10dp"
-                    android:gravity="bottom"
                     android:orientation="vertical"
                     android:clipChildren="false"
                     android:clipToPadding="false"
@@ -531,34 +582,21 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- One row of every poster, scrolling sideways; each card's margin leaves room for its focus scale. -->
-                <FrameLayout
-                    android:layout_width="match_parent"
+                <!-- One dash per title, the current one longer; focusable, it is the carousel's control. Its padding
+                     gives the focus pill room around the dashes. -->
+                <com.gathin.tvhome.PageDashes
+                    android:id="@+id/titleDashes"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginBottom="10dp">
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/titleRow"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/title_row_height"
-                        android:paddingStart="2dp"
-                        android:paddingEnd="2dp"
-                        android:overScrollMode="never"
-                        android:scrollbars="none"
-                        android:descendantFocusability="afterDescendants" />
-
-                    <TextView
-                        android:id="@+id/titleEmpty"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:text="@string/nav_empty"
-                        android:textColor="#80FFFFFF"
-                        android:textSize="15sp"
-                        android:fontFamily="@string/font_regular"
-                        android:visibility="gone" />
-                </FrameLayout>
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="36dp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:background="@drawable/page_dashes_bg"
+                    android:focusable="true"
+                    android:visibility="invisible" />
             </LinearLayout>
         </FrameLayout>
     </LinearLayout>

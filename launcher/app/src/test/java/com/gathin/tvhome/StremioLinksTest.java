@@ -25,6 +25,25 @@ public class StremioLinksTest {
     }
 
     @Test
+    public void anEpisodeResumesWithAutoPlayAndItsColonsIntact() {
+        assertEquals("stremio:///detail/series/tt0903747/tt0903747:2:5?autoPlay=true",
+                StremioLinks.resume("series", "tt0903747", "tt0903747:2:5"));
+    }
+
+    @Test
+    public void aMovieResumesItself() {
+        assertEquals("stremio:///detail/movie/tt0947798/tt0947798?autoPlay=true",
+                StremioLinks.resume("movie", "tt0947798", "tt0947798"));
+    }
+
+    @Test
+    public void withoutAVideoResumeIsTheTitlesPage() {
+        assertEquals("stremio:///detail/series/tt0903747", StremioLinks.resume("series", "tt0903747", ""));
+        assertNull(StremioLinks.resume(null, "tt1", "tt1:1:1"));
+        assertNull(StremioLinks.resume("series", " ", "tt1:1:1"));
+    }
+
+    @Test
     public void noLinkWithoutATypeOrAnId() {
         assertNull(StremioLinks.detail(null, "tt1"));
         assertNull(StremioLinks.detail("movie", null));

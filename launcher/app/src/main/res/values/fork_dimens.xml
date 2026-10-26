@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Sizes for this fork's own features, kept apart from upstream's resources. -->
 <resources>
-    <!-- Nav tab row (nav_tabs): 2:3 posters in one row under the hero. -->
-    <dimen name="title_card_width">96dp</dimen>
-    <dimen name="title_card_height">144dp</dimen>
+    <!-- Cards (Home's Continue Watching): rounded corners and the space around each. -->
     <dimen name="title_card_margin">8dp</dimen>
     <dimen name="title_card_corner">5dp</dimen>
-    <!-- The row: a card plus its margins, which leave room for the focused card's scale. -->
-    <dimen name="title_row_height">160dp</dimen>
-    <!-- The hero over the row: the focused title's name, details, summary and buttons. -->
+    <!-- Nav tabs' page indicator (nav_tabs): a dash per title, the current one longer. -->
+    <dimen name="dash_width">12dp</dimen>
+    <dimen name="dash_active_width">28dp</dimen>
+    <dimen name="dash_gap">6dp</dimen>
+    <dimen name="dash_thickness">3dp</dimen>
+    <!-- Home's Continue Watching row (resume_row): 16:9 backdrop cards under the dock. -->
+    <dimen name="resume_card_width">192dp</dimen>
+    <dimen name="resume_card_height">108dp</dimen>
+    <!-- The cards' row: a card plus room for its focus scale. -->
+    <dimen name="resume_row_height">128dp</dimen>
+    <!-- The whole block (label, gap, row) and the space under it: the room the dock moves up by. -->
+    <dimen name="resume_block_height">156dp</dimen>
+    <dimen name="resume_block_bottom">14dp</dimen>
+
+    <!-- The nav tabs' text over the backdrop: the title's name, details, summary and buttons. -->
     <dimen name="title_hero_width">560dp</dimen>
 </resources>

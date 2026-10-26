@@ -279,7 +279,8 @@
     <!-- Every app in one row: the dock apps first, the rest after them, and the row scrolls sideways when focus
          reaches its edge. No grid below; rows_below_dock is ignored. Needs dock_row. Can also be set with
          "single_row" in a theme. -->
-    <bool name="single_row">false</bool>
+    <!-- Fork: on, so Home's Continue Watching row (resume_row) has the space under the dock to itself. -->
+    <bool name="single_row">true</bool>
     <!-- With single_row, the band runs behind every app in the row, apps installed later included, instead of
          the dock apps only. Can also be set with "dock_band_all" in a theme. -->
     <bool name="dock_band_all">false</bool>
@@ -421,6 +422,14 @@
          is selected as it takes focus. Fork default: on. Can also be set with "nav_tabs": false in a theme's
          config.json. -->
     <bool name="nav_tabs">true</bool>
+    <!-- Home's Continue Watching row under the dock: the latest titles of the Stremio library, from the companion app
+         (cleantv-feeds). Needs nav_tabs and single_row. Fork default: on. Can also be set with "resume_row": false in
+         a theme's config.json. -->
+    <bool name="resume_row">true</bool>
+    <!-- Raises the dock, and Continue Watching under it, this many dp, leaving the room at the bottom of the screen,
+         so the dock sits closer to the top bar. 0 keeps them where they were (the default). Can also be set with "dock_lift": 60 in a theme's config.json
+         (0 to 300). -->
+    <integer name="dock_lift">0</integer>
     <!-- Where the TV is, in decimal degrees, so the sky's sunrise and sunset glows follow the real sun
          (computed on the TV, no network). Empty: a fixed temperate day, sunset glow around 19:00.
          Vilnius: 54.69 and 25.28. -->

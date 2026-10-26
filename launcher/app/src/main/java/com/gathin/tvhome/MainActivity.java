@@ -182,9 +182,17 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private NavBar navBar;
     private View tabPanel;
     private TitleBrowser titles;
-    private PosterLoader posterLoader;
     private PosterLoader backdropLoader;
     private Backdrop backdrop;
+    /** resume_row: Continue Watching under the dock; null when off. */
+    private ResumeRow resumeRow;
+    private PosterLoader resumeLoader;
+    /** Whether focus was last in the Continue Watching row, so coming back from Stremio returns there. */
+    private boolean inResumeRow;
+    /** Room kept under the dock for the Continue Watching row while it shows, in px. */
+    private int bottomReservePx;
+    /** dock_lift in px: the dock, and Continue Watching under it, sit this much higher. */
+    private int dockLiftPx;
     /** Asks the companion app for a sync on the way back to Home, when its data is stale. */
     private FeedsRefresh feedsRefresh;
     /** Told by the companion app when a sync finished; null when the app is not installed. */
@@ -414,6 +422,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         settingsKeycodes = cfg.settingsKeycodes;
         settingsKeyPanel = cfg.settingsKeyPanel;
         COLUMNS = cfg.columns;
+        dockLiftPx = Math.round(cfg.dockLift * density);
         animations = cfg.animations;
         advancedEffects = cfg.animations && cfg.advancedEffects;
         reducedMotion = cfg.reducedMotion;
@@ -635,7 +644,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // Keep the hero below the header when the library is enabled on a short screen,
             // even when the theme requests an extra visible row below the dock.
             int shelfClearance = cfg.appLibrary ? hero.getMeasuredHeight() + (int) (40 * density) : 0;
-            int want = Math.max(shelfClearance, h - dockRow - gridRows - (int) (AppAdapter.BOTTOM_ROOM_DP * density));
+            int want = Math.max(shelfClearance,
+                    h - dockRow - gridRows - (int) (AppAdapter.BOTTOM_ROOM_DP * density) - bottomReservePx
+                            - dockLiftPx);   // dock_lift: higher, nearer the top bar
             // Where the rows cannot fit even at the smallest tile (3 rows with the title on), the title keeps its
             // room above the dock and the last rows run off the bottom instead of the title drawing over the clock.
             if (MainActivity.this.dockRow && cfg.dockTitle && rowsBelowDock > 0) want = Math.max(want, (int) (AppAdapter.TITLE_ROOM_DP * density));
@@ -835,7 +846,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
         if (festive) applyFestiveSkin((TextView) btnInputs, (TextView) btnSettings);
 
-        if (cfg.navTabs) setUpNavTabs();
+        if (cfg.navTabs) setUpNavTabs(cfg.resumeRow && singleRow);
 
         // Hide the glass when focus leaves the tiles.
         getWindow().getDecorView().getViewTreeObserver().addOnGlobalFocusChangeListener((oldF, newF) -> {
@@ -972,7 +983,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // The companion app was installed after Home started, so nothing was watching its syncs yet.
             if (feedsObserver == null) {
                 watchFeeds();
-                if (feedsObserver != null) titles.reload();
+                if (feedsObserver != null) {
+                    titles.reload();
+                    if (resumeRow != null) resumeRow.reload();
+                }
             }
             feedsRefresh.requestIfStale();
         }
@@ -1168,6 +1182,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             else if (navBar != null && !navBar.onHome()) {
                 if (!titles.restoreFocus()) navBar.focusSelected();   // back on the card or button that opened it
             }
+            else if (inResumeRow && resumeRow != null && resumeRow.restoreFocus()) inResumeRow = true;
             else focusTile(pos >= 0 ? pos : returnSlot);
             tilesReady = true;
             startPendingSettingsReorder();
@@ -1255,10 +1270,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         unregisterReceiver(packageReceiver);
         wallpaperPlayer.close();
         if (titles != null) titles.shutdown();
-        if (posterLoader != null) posterLoader.shutdown();
         if (backdropLoader != null) backdropLoader.shutdown();
         if (backdrop != null) backdrop.shutdown();
         if (feedsRefresh != null) feedsRefresh.shutdown();
+        if (resumeRow != null) resumeRow.shutdown();
+        if (resumeLoader != null) resumeLoader.shutdown();
         if (feedsObserver != null) getContentResolver().unregisterContentObserver(feedsObserver);
         ConnectivityManager cm = getSystemService(ConnectivityManager.class);
         TvInputManager tim = (TvInputManager) getSystemService(TV_INPUT_SERVICE);
@@ -1672,6 +1688,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     public void onTileFocused(int position, View card) {
+        inResumeRow = false;
         lastFocused = position;
         lastFocusedKey = adapter.keyAt(position);
         // Focus restored before the first layout (cold start): the tile has no size yet, and the glass
@@ -2292,7 +2309,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // One row: Up leaves for the top bar, Down has nowhere to go, and Left/Right walk the whole row,
             // stopping at its two ends (the default focus search scrolls the row to the next tile).
             if (keyCode == KeyEvent.KEYCODE_DPAD_UP) return focusNavBar();
-            if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) return true;
+            if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                if (resumeRow != null) resumeRow.focus();   // Continue Watching, when it shows
+                return true;
+            }
             boolean forward = rtlAppGrid ? keyCode == KeyEvent.KEYCODE_DPAD_LEFT : keyCode == KeyEvent.KEYCODE_DPAD_RIGHT;
             int last = adapter.focusablePosition(count - 1);
             if (forward && position >= last) {
@@ -2347,9 +2367,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     /**
      * nav_tabs: the nav bar takes the place of the greeting, clock and date (every other child of their block goes),
-     * and a panel takes the grid's place while a tab other than Home is selected.
+     * and a panel takes the grid's place while a tab other than Home is selected. withResumeRow adds Continue
+     * Watching under the dock (resume_row, which needs single_row).
      */
-    private void setUpNavTabs() {
+    private void setUpNavTabs(boolean withResumeRow) {
         ViewGroup bar = findViewById(R.id.navBar);
         ViewGroup block = (ViewGroup) clockBlock;
         for (int i = 0; i < block.getChildCount(); i++) {
@@ -2357,13 +2378,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (child != bar) child.setVisibility(View.GONE);
         }
         tabPanel = findViewById(R.id.tabPanel);
-        // The grid's cards are about half the size the posters are stored at: decode them at half.
-        posterLoader = new ProviderPosterLoader(getContentResolver(), PosterMemory.budget(Runtime.getRuntime().maxMemory()), 2);
         // Backdrops decode to about 1 MB each (960 x 540, RGB_565): keep the last few, for moving back and forth.
         backdropLoader = new ProviderPosterLoader(getContentResolver(), PosterMemory.BACKDROP_BYTES, 1);
         backdrop = new Backdrop(findViewById(R.id.backdrop), backdropLoader, animations && !reducedMotion);
-        titles = new TitleBrowser(tabPanel, new ProviderCatalogSource(getContentResolver()), posterLoader,
-                animations && !reducedMotion, new TitleBrowser.Host() {
+        titles = new TitleBrowser(tabPanel, new ProviderCatalogSource(getContentResolver()), new TitleBrowser.Host() {
             @Override
             public void onLeaveUp() {
                 navBar.focusSelected();
@@ -2387,6 +2405,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         });
         watchFeeds();
         feedsRefresh = new FeedsRefresh(getContentResolver());
+        if (withResumeRow) setUpResumeRow();
         navBar = new NavBar(bar, new NavBar.Listener() {
             @Override
             public void onTabSelected(int tab) {
@@ -2416,6 +2435,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         boolean home = NavTabs.showsGrid(tab);
         grid.setVisibility(home ? View.VISIBLE : View.INVISIBLE);
         tabPanel.setVisibility(home ? View.GONE : View.VISIBLE);
+        if (resumeRow != null) resumeRow.setOnHome(home);
         if (home) {
             backdrop.hide();
         } else {
@@ -2432,9 +2452,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         feedsObserver = new ContentObserver(handler) {
             @Override
             public void onChange(boolean selfChange) {
-                posterLoader.clear();
                 backdropLoader.clear();
                 titles.reload();
+                if (resumeRow != null) {
+                    resumeLoader.clear();
+                    resumeRow.reload();
+                }
             }
         };
         try {
@@ -2442,6 +2465,53 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         } catch (SecurityException e) {
             feedsObserver = null;
         }
+    }
+
+    /** resume_row: Continue Watching under the dock, loaded now and again after every sync. */
+    private void setUpResumeRow() {
+        // 192 x 108 dp cards at 2 px per dp want 384 x 216 px: the 960 x 540 backdrops decode at a quarter.
+        resumeLoader = new ProviderPosterLoader(getContentResolver(), PosterMemory.RESUME_BYTES, 2);
+        // dock_lift raises Continue Watching with the dock, so it stays right under it.
+        View resumeBlock = findViewById(R.id.resumeBlock);
+        ViewGroup.MarginLayoutParams blockLp = (ViewGroup.MarginLayoutParams) resumeBlock.getLayoutParams();
+        blockLp.bottomMargin += dockLiftPx;
+        resumeBlock.setLayoutParams(blockLp);
+        resumeRow = new ResumeRow(resumeBlock, new ProviderResumeSource(getContentResolver()),
+                resumeLoader, animations && !reducedMotion, new ResumeRow.Host() {
+            @Override
+            public void onLeaveUp() {
+                focusTile(lastFocused);
+            }
+
+            @Override
+            public void open(@NonNull ResumeItem item) {
+                resumeInStremio(item);
+            }
+
+            @Override
+            public void onFocused() {
+                inResumeRow = true;
+                hideHero();
+            }
+
+            @Override
+            public void onShown(boolean shown) {
+                Resources res = getResources();
+                bottomReservePx = shown ? res.getDimensionPixelSize(R.dimen.resume_block_height)
+                        + res.getDimensionPixelSize(R.dimen.resume_block_bottom) : 0;
+                grid.requestLayout();   // the dock moves up to make room, or back down
+            }
+        });
+        resumeRow.reload();
+    }
+
+    /** OK on a Continue Watching card: the video where it was left, playing at once when Stremio still has a stream. */
+    private void resumeInStremio(ResumeItem item) {
+        String link = StremioLinks.resume(item.type, item.id, item.videoId);
+        if (link == null) return;
+        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+        i.setPackage(StremioLinks.PACKAGE);
+        open(i);
     }
 
     /** The Trailer button: the trailer in the YouTube app. */

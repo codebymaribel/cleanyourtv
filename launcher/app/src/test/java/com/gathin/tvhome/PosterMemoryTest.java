@@ -4,20 +4,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/** Plain JVM tests for the poster cache's memory budget. */
+/** Plain JVM tests for the image caches' sizes. */
 public class PosterMemoryTest {
-
-    private static final long MB = 1024 * 1024;
-
-    @Test
-    public void aSmallHeapGetsAnEighth() {
-        assertEquals((int) (64 * MB / 8), PosterMemory.budget(64 * MB));
-    }
-
-    @Test
-    public void aLargeHeapIsCappedAt16Mb() {
-        assertEquals(PosterMemory.MAX_BYTES, PosterMemory.budget(512 * MB));
-    }
 
     @Test
     public void theBackdropCacheHoldsFourFullBackdrops() {
@@ -25,7 +13,7 @@ public class PosterMemoryTest {
     }
 
     @Test
-    public void nonsenseGivesNoCache() {
-        assertEquals(0, PosterMemory.budget(-1));
+    public void theResumeCacheHoldsItsTenCardsAtHalfSize() {
+        assertEquals(10 * 480 * 270 * 2, PosterMemory.RESUME_BYTES);
     }
 }

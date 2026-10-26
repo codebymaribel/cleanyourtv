@@ -18,9 +18,9 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 /**
- * {@link PosterLoader} on the companion app's poster files. The posters arrive already shrunk to the focused card
- * (432 x 648), and decode as RGB_565, half the memory of ARGB_8888 (a poster has no transparency): about 560 KB
- * each. A memory cache of {@link PosterMemory#budget} bytes keeps a tab or two of them.
+ * {@link PosterLoader} on the companion app's image files (backdrops, already shrunk to 960 x 540). They decode as
+ * RGB_565, half the memory of ARGB_8888 (they have no transparency), into an LRU cache of the given size
+ * ({@link PosterMemory}).
  */
 final class ProviderPosterLoader implements PosterLoader {
 
@@ -31,8 +31,8 @@ final class ProviderPosterLoader implements PosterLoader {
     private final Handler main = new Handler(Looper.getMainLooper());
 
     /**
-     * @param sampleSize decode at 1/sampleSize of the stored size: 2 for the grid's cards, about half the focused
-     *                   focused card size the posters are stored at, which takes a quarter of the memory.
+     * @param sampleSize decode at 1/sampleSize of the stored size: 2 for Continue Watching's cards, which are about
+     *                   half a stored backdrop and take a quarter of the memory that way; 1 for full-screen backdrops.
      */
     ProviderPosterLoader(@NonNull ContentResolver resolver, int budgetBytes, int sampleSize) {
         this.resolver = resolver;
