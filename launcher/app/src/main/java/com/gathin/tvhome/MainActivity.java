@@ -179,7 +179,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** nav_tabs: the bar in the clock's place and the panel shown in the grid's place; null when off. */
     private NavBar navBar;
     private View tabPanel;
-    private TextView tabPanelTitle;
+    private Carousel carousel;
     private View btnInputs;
     /** config show_inputs_pill: false keeps the Inputs pill hidden even when the TV has inputs. */
     private boolean showInputsPill = true;
@@ -1148,7 +1148,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         grid.post(() -> {
             int pos = adapter.positionOf(returnKey);
             if (returnToLibrary || libraryFocusPending) focusLibrary();
-            else if (navBar != null && !navBar.onHome()) navBar.focusSelected();
+            else if (navBar != null && !navBar.onHome()) {
+                if (!carousel.focus()) navBar.focusSelected();   // back on the card that was opened
+            }
             else focusTile(pos >= 0 ? pos : returnSlot);
             tilesReady = true;
             startPendingSettingsReorder();
@@ -1235,6 +1237,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         super.onDestroy();
         unregisterReceiver(packageReceiver);
         wallpaperPlayer.close();
+        if (carousel != null) carousel.shutdown();
         ConnectivityManager cm = getSystemService(ConnectivityManager.class);
         TvInputManager tim = (TvInputManager) getSystemService(TV_INPUT_SERVICE);
         if (tim != null) tim.unregisterCallback(inputCallback);
@@ -2320,10 +2323,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         return true;
     }
 
-    /** Titles for the tab panel, in NavTabs order. */
-    private static final int[] TAB_TITLES = {
-            R.string.nav_home, R.string.nav_popular, R.string.nav_watchlist, R.string.nav_friends};
-
     /**
      * nav_tabs: the nav bar takes the place of the greeting, clock and date (every other child of their block goes),
      * and a panel takes the grid's place while a tab other than Home is selected.
@@ -2336,7 +2335,17 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (child != bar) child.setVisibility(View.GONE);
         }
         tabPanel = findViewById(R.id.tabPanel);
-        tabPanelTitle = findViewById(R.id.tabPanelTitle);
+        carousel = new Carousel(tabPanel, new FakeCatalogSource(), animations && !reducedMotion, new Carousel.Host() {
+            @Override
+            public void onCarouselUp() {
+                navBar.focusSelected();
+            }
+
+            @Override
+            public void openItem(@NonNull CatalogItem item) {
+                openInStremio(item);
+            }
+        });
         navBar = new NavBar(bar, new NavBar.Listener() {
             @Override
             public void onTabSelected(int tab) {
@@ -2345,8 +2354,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
             @Override
             public void onTabEnter(int tab) {
-                // Home: back to the dock tile Up came from. The other tabs have nothing to focus until the carousel.
+                // Home: back to the dock tile Up came from. The other tabs: the card the carousel was last on.
                 if (NavTabs.showsGrid(tab)) focusTile(singleRow ? lastFocused : lastFocused % COLUMNS);
+                else carousel.focus();
             }
 
             @Override
@@ -2367,8 +2377,17 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         tabPanel.setVisibility(home ? View.GONE : View.VISIBLE);
         if (!home) {
             hideHero();
-            tabPanelTitle.setText(TAB_TITLES[tab]);
+            carousel.show(tab);
         }
+    }
+
+    /** OK on a carousel card: the title's page in Stremio, which for a movie is its list of streams. */
+    private void openInStremio(CatalogItem item) {
+        String link = StremioLinks.detail(item.type, item.id);
+        if (link == null) return;
+        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+        i.setPackage(StremioLinks.PACKAGE);
+        open(i);
     }
 
     /**

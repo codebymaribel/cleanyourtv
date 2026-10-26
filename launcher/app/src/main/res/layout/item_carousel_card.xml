@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One title in a nav tab's carousel: its poster, or its name on a coloured placeholder until there is one. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/carouselCard"
+    android:layout_width="@dimen/carousel_card_width"
+    android:layout_height="@dimen/carousel_card_height"
+    android:layout_marginEnd="@dimen/carousel_spacing"
+    android:background="@drawable/carousel_card_bg"
+    android:focusable="true"
+    android:clickable="true">
+
+    <ImageView
+        android:id="@+id/carouselPoster"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:importantForAccessibility="no" />
+
+    <TextView
+        android:id="@+id/carouselPlaceholder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:padding="14dp"
+        android:textColor="#E6FFFFFF"
+        android:textSize="16sp"
+        android:fontFamily="@string/font_medium"
+        android:maxLines="4"
+        android:ellipsize="end" />
+</FrameLayout>
