@@ -1,0 +1,10 @@
+{
+  "icon_only_buttons": true,
+  "icon_only_inputs": true,
+  "dock_band": true,
+  "glass_style": "rim",
+  "columns": 6,
+  "grid_backdrop_color": "#14244F",
+  "ambient_glow": true,
+  "dock_lift": 120
+}

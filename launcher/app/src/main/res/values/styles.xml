@@ -24,7 +24,9 @@
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
     </style>
-    <style name="TopButton" parent="TopButtonBase" />
+    <style name="TopButton" parent="TopButtonBase">
+        <item name="android:background">@drawable/top_icon_bg</item>
+    </style>
 
     <!-- Hero button (nav_tabs): a pill like the top bar's, white when focused. -->
     <style name="HeroButton" parent="TopButtonBase">
@@ -53,6 +55,7 @@
         <item name="android:paddingStart">10dp</item>
         <item name="android:paddingEnd">10dp</item>
         <item name="android:drawablePadding">0dp</item>
+        <item name="android:background">@drawable/top_icon_bg</item>
     </style>
 
     <style name="SettingsRow">

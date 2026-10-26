@@ -3,7 +3,7 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FF000000">
+    android:background="#ff000000">
 
     <!-- Grid backdrop (config.xml grid_backdrop_color): a radial fade under a faint grid, drawn once. Gone when off. -->
     <View
@@ -423,7 +423,6 @@
                 <TextView
                     android:id="@+id/btnSettings"
                     style="@style/TopButton"
-                    android:text="@string/settings"
                     android:drawableStart="@drawable/ic_settings"
                     android:nextFocusDown="@+id/grid" />
             </LinearLayout>
@@ -469,7 +468,7 @@
                     android:layout_marginStart="18dp"
                     android:text="@string/continue_watching"
                     android:textColor="#D9FFFFFF"
-                    android:textSize="15sp"
+                    android:textSize="20sp"
                     android:fontFamily="@string/font_medium" />
 
                 <androidx.recyclerview.widget.RecyclerView
