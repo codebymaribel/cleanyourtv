@@ -29,21 +29,22 @@ final class ProviderCatalogSource implements CatalogSource {
             int id = c.getColumnIndexOrThrow(FeedsContract.COLUMN_ID);
             int title = c.getColumnIndexOrThrow(FeedsContract.COLUMN_TITLE);
             int summary = c.getColumnIndexOrThrow(FeedsContract.COLUMN_SUMMARY);
-            int hasPoster = c.getColumnIndexOrThrow(FeedsContract.COLUMN_HAS_POSTER);
             // Columns an older app does not have yet: -1, read as empty.
             int hasBackdrop = c.getColumnIndex(FeedsContract.COLUMN_HAS_BACKDROP);
             int year = c.getColumnIndex(FeedsContract.COLUMN_YEAR);
             int genres = c.getColumnIndex(FeedsContract.COLUMN_GENRES);
             int runtime = c.getColumnIndex(FeedsContract.COLUMN_RUNTIME);
             int trailer = c.getColumnIndex(FeedsContract.COLUMN_TRAILER);
+            int rating = c.getColumnIndex(FeedsContract.COLUMN_RATING);
+            int friend = c.getColumnIndex(FeedsContract.COLUMN_FRIEND);
             List<CatalogItem> items = new ArrayList<>(c.getCount());
             while (c.moveToNext()) {
                 String itemId = text(c, id);
-                String poster = c.getInt(hasPoster) == 1 ? FeedsContract.poster(tab, itemId) : null;
                 String backdrop = hasBackdrop >= 0 && c.getInt(hasBackdrop) == 1 ? FeedsContract.backdrop(itemId) : null;
                 String trailerId = text(c, trailer);
-                items.add(new CatalogItem(text(c, type), itemId, text(c, title), text(c, summary), poster, backdrop,
-                        text(c, year), text(c, genres), text(c, runtime), trailerId.isEmpty() ? null : trailerId));
+                items.add(new CatalogItem(text(c, type), itemId, text(c, title), text(c, summary), backdrop,
+                        text(c, year), text(c, genres), text(c, runtime), trailerId.isEmpty() ? null : trailerId,
+                        text(c, rating), text(c, friend)));
             }
             return items;
         } catch (SecurityException | IllegalArgumentException e) {

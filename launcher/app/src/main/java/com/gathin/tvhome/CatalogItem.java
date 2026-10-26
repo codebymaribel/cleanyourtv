@@ -11,10 +11,8 @@ final class CatalogItem {
     /** Stremio meta id, an IMDb id such as "tt0947798" for Cinemeta titles. */
     @NonNull final String id;
     @NonNull final String title;
-    /** Shown in the detail panel next to the focused card; empty when there is none. */
+    /** Shown under the title in the hero; empty when there is none. */
     @NonNull final String summary;
-    /** The poster's content URI in the companion app; null when it has none yet, and the card draws a placeholder. */
-    @Nullable final String posterUri;
     /** The title's wide still in the companion app, shown full screen behind the tab; null without one. */
     @Nullable final String backdropUri;
     /** Release year, "" when unknown. */
@@ -25,19 +23,24 @@ final class CatalogItem {
     @NonNull final String runtime;
     /** The trailer's YouTube video id; null without one. */
     @Nullable final String trailerId;
+    /** Letterboxd's average rating out of 5 ("4.2"); "" when unknown. */
+    @NonNull final String rating;
+    /** In Friends, who watched it ("Luis Bohorquez · ★½"); "" elsewhere. */
+    @NonNull final String friend;
 
     CatalogItem(@NonNull String type, @NonNull String id, @NonNull String title, @NonNull String summary,
-                @Nullable String posterUri, @Nullable String backdropUri, @NonNull String year,
-                @NonNull String genres, @NonNull String runtime, @Nullable String trailerId) {
+                @Nullable String backdropUri, @NonNull String year, @NonNull String genres, @NonNull String runtime,
+                @Nullable String trailerId, @NonNull String rating, @NonNull String friend) {
         this.type = type;
         this.id = id;
         this.title = title;
         this.summary = summary;
-        this.posterUri = posterUri;
         this.backdropUri = backdropUri;
         this.year = year;
         this.genres = genres;
         this.runtime = runtime;
         this.trailerId = trailerId;
+        this.rating = rating;
+        this.friend = friend;
     }
 }

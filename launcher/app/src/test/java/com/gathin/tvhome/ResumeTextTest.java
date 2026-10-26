@@ -9,8 +9,8 @@ public class ResumeTextTest {
 
     @Test
     public void aSeriesVideoIdNamesItsEpisode() {
-        assertEquals("T2 · E5", ResumeText.episode("tt0903747:2:5"));
-        assertEquals("T10 · E12", ResumeText.episode("tt0903747:010:12"));
+        assertEquals("S2 · E5", ResumeText.episode("tt0903747:2:5"));
+        assertEquals("S10 · E12", ResumeText.episode("tt0903747:010:12"));
     }
 
     @Test

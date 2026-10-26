@@ -524,6 +524,21 @@
                     android:clipToPadding="false"
                     android:visibility="invisible">
 
+                    <!-- Friends: who watched it, above the title; gone in the other tabs. -->
+                    <TextView
+                        android:id="@+id/titleHeroFriend"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:textColor="#D9FFFFFF"
+                        android:textSize="13sp"
+                        android:fontFamily="@string/font_medium"
+                        android:letterSpacing="0.06"
+                        android:textAllCaps="true"
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:visibility="gone" />
+
                     <TextView
                         android:id="@+id/titleHeroName"
                         android:layout_width="match_parent"

@@ -5,8 +5,10 @@
     <string name="nav_popular" translatable="false">Popular</string>
     <string name="nav_watchlist" translatable="false">Watchlist</string>
     <string name="nav_friends" translatable="false">Friends</string>
-    <string name="nav_empty" translatable="false">Nada por acá todavía</string>
+    <string name="nav_empty" translatable="false">Nothing here yet</string>
     <string name="open_in_stremio" translatable="false">Watch in Stremio</string>
     <string name="trailer" translatable="false">Trailer</string>
     <string name="continue_watching" translatable="false">Continue watching</string>
+    <!-- Friends: who watched the title, as Stremboxd writes it ("Luis Bohorquez · ★½"). -->
+    <string name="watched_by" translatable="false">Watched by %1$s</string>
 </resources>

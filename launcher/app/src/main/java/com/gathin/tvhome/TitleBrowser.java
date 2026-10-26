@@ -40,6 +40,7 @@ final class TitleBrowser {
     }
 
     private final View hero;
+    private final TextView heroFriend;
     private final TextView heroName;
     private final TextView heroMeta;
     private final TextView heroSummary;
@@ -65,6 +66,7 @@ final class TitleBrowser {
         this.source = source;
         this.host = host;
         hero = panel.findViewById(R.id.titleHero);
+        heroFriend = panel.findViewById(R.id.titleHeroFriend);
         heroName = panel.findViewById(R.id.titleHeroName);
         heroMeta = panel.findViewById(R.id.titleHeroMeta);
         heroSummary = panel.findViewById(R.id.titleHeroSummary);
@@ -171,7 +173,9 @@ final class TitleBrowser {
         remembered[tab] = position;
         CatalogItem item = items.get(position);
         heroName.setText(item.title);
-        String meta = MetaLine.compose(item.year, item.genres, item.runtime);
+        heroFriend.setText(item.friend.isEmpty() ? "" : heroFriend.getResources().getString(R.string.watched_by, item.friend));
+        heroFriend.setVisibility(item.friend.isEmpty() ? View.GONE : View.VISIBLE);
+        String meta = MetaLine.compose(item.year, item.genres, item.runtime, item.rating);
         heroMeta.setText(meta);
         heroMeta.setVisibility(meta.isEmpty() ? View.GONE : View.VISIBLE);
         heroSummary.setText(item.summary);

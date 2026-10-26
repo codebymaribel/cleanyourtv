@@ -13,7 +13,6 @@ final class FeedsContract {
     static final String PERMISSION = "com.codebymaribel.feeds.permission.READ_FEEDS";
 
     static final String PATH_FEED = "feed";
-    static final String PATH_POSTER = "poster";
     static final String PATH_BACKDROP = "backdrop";
     static final String PATH_RESUME = "resume";
 
@@ -21,8 +20,6 @@ final class FeedsContract {
     static final String COLUMN_ID = "id";
     static final String COLUMN_TITLE = "title";
     static final String COLUMN_SUMMARY = "summary";
-    /** 1 when the title has a poster saved, 0 when the card draws its placeholder. */
-    static final String COLUMN_HAS_POSTER = "has_poster";
     /** 1 when the title has a backdrop saved. */
     static final String COLUMN_HAS_BACKDROP = "has_backdrop";
     static final String COLUMN_YEAR = "year";
@@ -31,6 +28,10 @@ final class FeedsContract {
     static final String COLUMN_RUNTIME = "runtime";
     /** The trailer's YouTube video id, "" when there is none. */
     static final String COLUMN_TRAILER = "trailer";
+    /** Letterboxd's average rating out of 5 ("4.2"), "" when unknown. */
+    static final String COLUMN_RATING = "rating";
+    /** In Friends, who watched it ("Luis Bohorquez · ★½"), "" elsewhere. */
+    static final String COLUMN_FRIEND = "friend";
 
     /** The video to resume: the movie's id, or "tt...:season:episode"; "" when unknown. */
     static final String COLUMN_VIDEO_ID = "video_id";
@@ -44,8 +45,8 @@ final class FeedsContract {
     static final String METHOD_SYNC_IF_STALE = "sync_if_stale";
 
     static final String[] COLUMNS = {
-            COLUMN_TYPE, COLUMN_ID, COLUMN_TITLE, COLUMN_SUMMARY, COLUMN_HAS_POSTER, COLUMN_HAS_BACKDROP,
-            COLUMN_YEAR, COLUMN_GENRES, COLUMN_RUNTIME, COLUMN_TRAILER};
+            COLUMN_TYPE, COLUMN_ID, COLUMN_TITLE, COLUMN_SUMMARY, COLUMN_HAS_BACKDROP,
+            COLUMN_YEAR, COLUMN_GENRES, COLUMN_RUNTIME, COLUMN_TRAILER, COLUMN_RATING, COLUMN_FRIEND};
 
     private FeedsContract() {
     }
@@ -58,11 +59,6 @@ final class FeedsContract {
     /** A tab's titles. */
     static String feed(int tab) {
         return root() + "/" + PATH_FEED + "/" + tab;
-    }
-
-    /** One title's poster in a tab (the same title can have a different poster in another tab). */
-    static String poster(int tab, String id) {
-        return root() + "/" + PATH_POSTER + "/" + tab + "/" + id;
     }
 
     /** The Stremio library's Continue Watching, latest first. */
